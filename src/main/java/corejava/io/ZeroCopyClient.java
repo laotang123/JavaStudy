@@ -30,17 +30,17 @@ class ZerocopyClient {
         sc.connect(sad);
         sc.configureBlocking(true);
 
-        String fname = "data/a.txt";
-        FileChannel fc = new FileInputStream(fname).getChannel();
+        String fileName = "data/a.txt";
+        FileChannel fc = new FileInputStream(fileName).getChannel();
         long start = System.nanoTime();
-        long nsent = 0, curnset = 0;
-        curnset = fc.transferTo(0, fc.size(), sc);
-        System.out.println("发送的总字节数:" + curnset + " 耗时(ns):" + (System.nanoTime() - start));
+        long sendSize;
+        sendSize = fc.transferTo(0, fc.size(), sc);
+        System.out.println("发送的总字节数:" + sendSize + " 耗时(ns):" + (System.nanoTime() - start));
         try {
             sc.close();
             fc.close();
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 }
