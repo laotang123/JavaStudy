@@ -1,0 +1,4 @@
+zero copy
+java file channel 实现零拷贝
+on disk zero copy
+server to local file
