@@ -15,9 +15,9 @@ import java.nio.channels.SocketChannel;
  * @version: $ 1.0
  */
 
-class ZerocopyClient {
+class ZeroCopyClient {
     public static void main(String[] args) throws IOException {
-        ZerocopyClient sfc = new ZerocopyClient();
+        ZeroCopyClient sfc = new ZeroCopyClient();
         sfc.testSendfile();
     }
 
