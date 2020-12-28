@@ -40,7 +40,7 @@ public class SocketClientV1 {
                 os = clientSocket.getOutputStream();
                 Scanner sc = new Scanner(System.in);
                 System.out.println("sending...");
-                while ((message = sc.nextLine()).equals("exit")) {
+                while (!(message = sc.nextLine()).equals("exit")) {
                     os.write(message.getBytes());
                 }
             } catch (IOException e) {

@@ -31,7 +31,8 @@ public class SocketServerV1 {
     public static void addUser(String name, Socket clientSocket) throws IOException {
         if (current < USER_LEN) {
             GROUP_USERS[current] = new NamedSocket(name, clientSocket);
-            log.info("name: " + name + "socket add successful");
+            log.info("name: " + name + " socket add successful");
+            return;
         }
         log.info("name socket create error! " + name);
     }
