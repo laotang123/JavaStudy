@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -30,12 +31,14 @@ public class SocketServerV1 {
 
     public static void addUser(String name, Socket clientSocket) throws IOException {
         if (current < USER_LEN) {
-            GROUP_USERS[current] = new NamedSocket(name, clientSocket);
+            GROUP_USERS[current++] = new NamedSocket(name, clientSocket);
             log.info("name: " + name + " socket add successful");
             return;
         }
         log.info("name socket create error! " + name);
     }
+
+
 
     /**
      * 设置 定时时间，返回处于就绪态可读的socket
@@ -85,6 +88,16 @@ public class SocketServerV1 {
         }
         return sb.toString();
     }
+    public static class Heart implements Runnable{
+        @Override
+        public void run() {
+
+        }
+        /**
+         * 定时汇报处于可连接状态的socket
+         */
+
+    }
 
     /**
      * 转发数据，读取readySet中inputStream的数据。转发到其他outputStream
@@ -100,8 +113,10 @@ public class SocketServerV1 {
         for (NamedSocket namedSocket : readySet) {
             String data = readData(namedSocket.getSocket());
             for (NamedSocket user : GROUP_USERS) {
-                OutputStream os = user.getSocket().getOutputStream();
-                os.write(data.getBytes());
+                if (user != null && user != namedSocket) {
+                    PrintWriter pw = new PrintWriter(user.getSocket().getOutputStream());
+                    pw.println(data);
+                }
             }
         }
 
@@ -114,10 +129,13 @@ public class SocketServerV1 {
         public void run() {
             while (true) {
                 HashSet<NamedSocket> sockets = listen(10);
+                if (sockets.size() > 0) {
+                    log.info("listen sockets: " + sockets);
+                }
                 try {
                     int readyCount = transferMessage(sockets);
                     if (readyCount != 0) {
-                        log.info("ready set size: " + readyCount);
+                        log.info("transfer size: " + readyCount);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

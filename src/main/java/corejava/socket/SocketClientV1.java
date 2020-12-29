@@ -3,6 +3,7 @@ package corejava.socket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -34,25 +35,22 @@ public class SocketClientV1 {
 
         @Override
         public void run() {
-            OutputStream os = null;
+            PrintWriter pw = null;
             String message;
             try {
-                os = clientSocket.getOutputStream();
+                pw = new PrintWriter(clientSocket.getOutputStream());
                 Scanner sc = new Scanner(System.in);
                 System.out.println("sending...");
                 while (!(message = sc.nextLine()).equals("exit")) {
-                    os.write(message.getBytes());
+                    pw.println(message);
+                    System.out.println("client send message: " + message);
+//                    os.flush();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-
-                if (os != null) {
-                    try {
-                        os.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if (pw != null) {
+                   pw.close();
                 }
             }
         }
