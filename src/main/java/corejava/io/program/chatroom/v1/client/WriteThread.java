@@ -24,7 +24,7 @@ public class WriteThread extends Thread {
 
         try {
             OutputStream outputStream = clientSocket.getOutputStream();
-            printWriter = new PrintWriter(outputStream);
+            printWriter = new PrintWriter(outputStream,true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,7 +38,7 @@ public class WriteThread extends Thread {
         printWriter.println(userName);
 
         String text;
-        System.out.print("[" + userName + "]: ");
+//        System.out.print("[" + userName + "]: ");
         while (!(text = scanner.nextLine()).equals("bye")) {
             printWriter.println(text);
             System.out.print("[" + userName + "]: ");

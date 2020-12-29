@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: ljf
@@ -19,7 +20,7 @@ import java.util.Set;
  * <p>
  * accept阻塞监听客户端的链接，将链接添加到userNames，userThreads并启动用户线程接收数据
  * 服务端的userThread只用来转发数据，read and write
- * TODO：多个客户端同时退出的并发问题
+ * TODO：多个客户端同时退出的并发问题, 客户端正常段开时给服务器能够检测到。同时给其他客户端发信息
  * socket全双工通信
  * @modified By：
  * @version: $ 1.0
@@ -28,7 +29,7 @@ public class ChatServer {
     private final int port;
     private final HashSet<String> userNames = new HashSet<>();
     private final HashSet<UserThread> userThreads = new HashSet<>();
-    private int connectedCount = 0;
+    public AtomicInteger connectedCount = new AtomicInteger(0);
 
     public ChatServer(int port) {
         this.port = port;
@@ -38,13 +39,12 @@ public class ChatServer {
         //监听端口
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("chat server listening on port:" + port);
-            while (true){
+            while (true) {
                 //创建服务端进程，accept阻塞监听
                 Socket clientSocket = serverSocket.accept();
 
                 UserThread newUser = new UserThread(clientSocket, this);
-                System.out.println("connectedCount: " + connectedCount + "new user connected: " + newUser.getUserName());
-                connectedCount++;
+                userThreads.add(newUser);
                 newUser.start();
             }
         } catch (IOException e) {
@@ -60,13 +60,13 @@ public class ChatServer {
 
     public void broadMessage(String serverMessage, UserThread userThread) {
         for (UserThread user : userThreads) {
-            if (user != userThread) { //除当前用户
+            if (user != null && user != userThread) { //除当前用户
                 user.sendMessage(serverMessage);
             }
         }
     }
 
-    public Set<String> getUserNames(){
+    public Set<String> getUserNames() {
         return this.userNames;
     }
 

@@ -29,7 +29,7 @@ public class UserThread extends Thread {
     public void run() {
         try {
             OutputStream outputStream = clientSocket.getOutputStream();
-            printWriter = new PrintWriter(outputStream);
+            printWriter = new PrintWriter(outputStream,true);
 
             //阻塞监听客户端发来的消息，然后转发给其他客户端
             InputStream inputStream = clientSocket.getInputStream();
@@ -39,8 +39,10 @@ public class UserThread extends Thread {
             //首条消息是 客户端姓名
             userName = bufferedReader.readLine();
             chatServer.addUserName(userName);
+            System.out.println("connectedCount: " + chatServer.connectedCount.getAndIncrement()
+                    + " new user connected: " + userName);
 
-            String serverMessage = "new user " + userName + "connected";
+            String serverMessage = "new user " + userName + " connected";
             chatServer.broadMessage(serverMessage, this);
 
             //read 阻塞，直到客户端发来"bye"消息，断开连接

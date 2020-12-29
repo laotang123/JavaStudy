@@ -12,7 +12,7 @@ import java.util.Scanner;
  * @version: $ 1.0
  */
 public class ChatClient {
-    private String userName;
+    private volatile String userName;
     private final String hostName;
     private final int port;
     private volatile boolean closed = false;
@@ -22,6 +22,13 @@ public class ChatClient {
         this.port = port;
     }
 
+    public static void main(String[] args) {
+        String hostName = "localhost";
+        int port =  12345;
+
+        ChatClient chatClient = new ChatClient(hostName, port);
+        chatClient.execute();
+    }
     /**
      * 与服务端建立连接
      */
@@ -42,6 +49,9 @@ public class ChatClient {
         }
     }
 
+    public void setClosed(){
+        closed = true;
+    }
     public boolean isClosed(){
         return closed;
     }
