@@ -45,6 +45,7 @@ public class WriteThread extends Thread {
         }
 
         try {
+            printWriter.println(text);
             clientSocket.close();
         } catch (IOException ex) {
 

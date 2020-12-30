@@ -27,6 +27,7 @@ public class UserThread extends Thread {
 
     @Override
     public void run() {
+        String serverMessage;
         try {
             OutputStream outputStream = clientSocket.getOutputStream();
             printWriter = new PrintWriter(outputStream,true);
@@ -42,7 +43,7 @@ public class UserThread extends Thread {
             System.out.println("connectedCount: " + chatServer.connectedCount.getAndIncrement()
                     + " new user connected: " + userName);
 
-            String serverMessage = "new user " + userName + " connected";
+            serverMessage = "new user " + userName + " connected";
             chatServer.broadMessage(serverMessage, this);
 
             //read 阻塞，直到客户端发来"bye"消息，断开连接
@@ -53,17 +54,24 @@ public class UserThread extends Thread {
                 chatServer.broadMessage(serverMessage, this);
             }
 
+        } catch (IOException e) {
+//            e.printStackTrace();
+            System.err.println(e.getMessage());
+        } finally {
             //与客户端socket断开连接
             chatServer.removeUser(userName, this);
-            clientSocket.shutdownOutput();//立即关闭输出流
-            clientSocket.close();
+            if(clientSocket!=null && clientSocket.isConnected()){
+                try {
+                    clientSocket.shutdownOutput();//立即关闭输出流
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
             //转发我离开的消息
-            serverMessage = userName + "has quited";
+            serverMessage = userName + " has quited";
             chatServer.broadMessage(serverMessage, this);
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

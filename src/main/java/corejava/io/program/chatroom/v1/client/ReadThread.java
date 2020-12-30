@@ -38,6 +38,7 @@ public class ReadThread extends Thread{
                 }
             } catch (SocketException se){ //TODO：正常退出替代这里
                 System.out.println("quit");
+                System.err.println(se.getMessage());
                 break;
             } catch (IOException ex) {
                 System.out.println("Error reading from server: " + ex.getMessage());
