@@ -3,10 +3,10 @@ package corejava.nio.chatroom;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -61,11 +61,11 @@ public class ChatServer {
                 return;
             }
 
-            if(readyChannelCount == 0){
+            if (readyChannelCount == 0) {
                 continue;
             }
 
-            if(!selector.isOpen()){
+            if (!selector.isOpen()) {
                 this.close();
                 return;
             }
@@ -74,7 +74,7 @@ public class ChatServer {
             //处理accept事件和read事件
             Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
             SelectionKey selectionKey;
-            while (keyIterator.hasNext()){
+            while (keyIterator.hasNext()) {
                 selectionKey = keyIterator.next();
                 this.handleSelectionKey(selectionKey);
                 keyIterator.remove();
@@ -84,14 +84,124 @@ public class ChatServer {
 
     /**
      * 根据selectionKey类型触发相应的操作
+     *
      * @param selectionKey：包含accept和read操作
      */
     private void handleSelectionKey(SelectionKey selectionKey) {
+        if (selectionKey.isValid()) {
+            if (selectionKey.isAcceptable()) {
+                this.handleAcceptableKey(selectionKey);
+            } else if (selectionKey.isReadable()) {
+                this.handleReadableKey(selectionKey);
+            } else {
+                System.out.println("---some things wrong---");
+            }
+        }
+    }
+
+    /**
+     * 读入数据
+     */
+    private void handleReadableKey(SelectionKey selectionKey) {
+        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+        ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+        int readBytes;
+
+        try {
+            readBytes = socketChannel.read(readBuffer);
+        } catch (IOException e) {
+            //发生异常，断开连接
+            this.handleClientDisconnect(socketChannel, selectionKey);
+            e.printStackTrace();
+            return;
+        }
+
+        if (readBytes > 0) {
+            System.out.println(new String(readBuffer.array(), StandardCharsets.UTF_8));
+        } else if (readBytes < 0) {
+            //异常情况，断开连接
+            this.handleClientDisconnect(socketChannel, selectionKey);
+        }
+
+    }
+
+    private void handleClientDisconnect(SocketChannel socketChannel, SelectionKey selectionKey) {
+        if (selectionKey != null) {
+            selectionKey.cancel();
+        }
+        try {
+            socketChannel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //服务端移除socketChannel
+        socketChannelSet.remove(socketChannel);
+    }
+
+    /**
+     * 处理accept操作的链接
+     */
+    private void handleAcceptableKey(SelectionKey selectionKey) {
+        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
+
+        SocketChannel socketChannel = null;
+        //接收新连接
+        try {
+            socketChannel = serverSocketChannel.accept();//非阻塞模式，可能返回null
+            socketChannel.configureBlocking(false);
+
+            //新连接socket注册到selector，监听读就绪事件
+            socketChannel.register(selector, SelectionKey.OP_READ);
+        } catch (IOException e) {
+            //关闭selectionKey
+            this.closeSelectionKey(selectionKey);
+            if (socketChannel != null) {
+                try {
+                    socketChannel.close();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        }
+
+        if (socketChannel == null) {
+            return;
+        }
+
+        System.out.println(getSocketIpAndPort(socketChannel) + "is online");
+        socketChannelSet.add(socketChannel);
+    }
+
+    private String getSocketIpAndPort(SocketChannel socketChannel) {
+        Socket socket = socketChannel.socket();
+        return socket.getInetAddress().getHostName() + ": " + socket.getPort();
+    }
+
+//    private void sendConnectedInfoToAll(SocketChannel socketChannel) {
+//
+//    }
+//
+//    private void sendOnlineInfoToNew(SocketChannel socketChannel) {
+//    }
+
+    private void closeSelectionKey(SelectionKey selectionKey) {
+        if (selectionKey != null) {
+            selectionKey.cancel();
+            if (selectionKey.channel() != null) {
+                try {
+                    selectionKey.channel().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
     }
 
     private void close() {
-        if(selector!=null){
+        if (selector != null) {
             try {
                 selector.close();
             } catch (IOException e) {
