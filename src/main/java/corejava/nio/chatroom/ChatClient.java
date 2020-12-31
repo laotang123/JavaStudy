@@ -26,7 +26,9 @@ public class ChatClient {
             //设置非阻塞
             socketChannel.configureBlocking(false);
 
+            //异步完成，如果connect操作在当前线程立即完成，返回true。如果没有则返回false，但是连接操作还在继续
             boolean connected = socketChannel.connect(new InetSocketAddress("127.0.0.1", 12345));
+            System.out.println(connected);
 
             while (socketChannel.finishConnect()) {
                 Scanner scanner = new Scanner(System.in);
