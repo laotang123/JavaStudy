@@ -5,6 +5,9 @@ package corejava;
  * @date: 2021/1/11 9:04
  * @description: clone为object方法
  * 默认为浅拷贝
+ * <p>
+ * 手动实现深拷贝：在进行clone时将没有实现Cloneable的属性 重新new对象赋值
+ * 或者属性都实现Cloneable接口
  * @modified By：
  * @version: $ 1.0
  */
