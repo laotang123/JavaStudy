@@ -14,6 +14,8 @@ package jvm.volatilestudy;
  *  构造方法私有化
  *  双重检查机制
  *  volatile关键字
+ *
+ *  -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly  获取汇编代码
  * @modified By:
  * @version: $ 1.0
  */
