@@ -14,8 +14,9 @@ public class HackSystem {
 
     public final static InputStream in = System.in;
 
-    private static ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    private static final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
+    //原来的system.out.println 将会替换为HackSystem.out.println。将写出的数据存入到buffer当中
     public final static PrintStream out = new PrintStream(buffer);
 
     public final static PrintStream err = out;

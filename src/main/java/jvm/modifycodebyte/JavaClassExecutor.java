@@ -48,9 +48,12 @@ public class JavaClassExecutor {
 
         if (readCount > 0) {
             String log = JavaClassExecutor.execute(buffer);
-            System.out.println(log);
+//            System.out.println(log);
             fos.write(log.getBytes());
+            System.out.println(Thread.currentThread().getContextClassLoader());
         }
+
+
     }
 }
 
