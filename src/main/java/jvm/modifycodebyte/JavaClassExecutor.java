@@ -1,11 +1,9 @@
 package jvm.modifycodebyte;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
+import java.util.Objects;
 
 /**
  * Javaclass执行工具
@@ -25,9 +23,9 @@ public class JavaClassExecutor {
     public static String execute(byte[] classByte) {
         HackSystem.clearBuffer();
         ClassModifier cm = new ClassModifier(classByte);
-        byte[] modiBytes = cm.modifyUTF8Constant("java/lang/System", "jvm/modifycodebyte/HackSystem");
+        byte[] modifyBytes = cm.modifyUTF8Constant("java/lang/System", "jvm/modifycodebyte/HackSystem");
         HotSwapClassLoader loader = new HotSwapClassLoader();
-        Class clazz = loader.loadByte(modiBytes);
+        Class<?> clazz = loader.loadByte(modifyBytes); //在不影响原有项目的加载机制前提下，通过开放defineClass方法多次载入指定类
         try {
             Method method = clazz.getMethod("main", String[].class);
             method.invoke(null, (Object) new String[]{null});
@@ -38,13 +36,21 @@ public class JavaClassExecutor {
     }
 
     public static void main(String[] args) throws IOException {
-        ServerHandler serverHandler = new ServerHandler();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(serverHandler);
+        String classPath = "target/classes/jvm/modifycodebyte/ServerHandler.class";
+        File file = new File(classPath);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        byte[] buffer = new byte[(int) file.length()];
 
-        String log = JavaClassExecutor.execute(baos.toByteArray());
-        System.out.println(log);
+        int readCount = fileInputStream.read(buffer);
+
+        String logPath = "./trace_log.txt";
+        FileOutputStream fos = new FileOutputStream(logPath);
+
+        if (readCount > 0) {
+            String log = JavaClassExecutor.execute(buffer);
+            System.out.println(log);
+            fos.write(log.getBytes());
+        }
     }
 }
 
