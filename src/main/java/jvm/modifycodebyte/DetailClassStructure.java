@@ -7,7 +7,8 @@ import java.io.IOException;
 /**
  * @author: ljf
  * @date: 2021/1/18 14:09
- * @description: 详解class文件结构
+ * @description: 详解class文件结构 TODO: 对比oracle的https://docs.oracle.com/javase/specs/index.html jvm规范文档 和javap 指令来解析；
+ * 常量池基本清晰。解析后续字段。
  * @modified By：
  * @version: $ 1.0
  */
@@ -17,6 +18,8 @@ public class DetailClassStructure {
     private static final int u1 = 1;
     private static final char[] HEX_CHAR = {'0', '1', '2', '3', '4', '5',
             '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+    private static final int CONSTANT_Utf8_info = 1;
 
     /**
      * 方法二：
@@ -66,5 +69,16 @@ public class DetailClassStructure {
         int constant_pool_count = ByteUtils.bytes2Int(buffer, offset, u2);
         offset += u2;
         System.out.println("constant_pool_count: " + constant_pool_count);
+
+        //常量池表，entry格式：cp_info [tag,info]
+//        for (int i = 0; i < constant_pool_count; i++) {
+        // tag=10 methodRef_info
+        int tag = ByteUtils.bytes2Int(buffer, offset, u1);
+        offset += u1;
+        System.out.println("tag: " + tag);
+        int classIndex = ByteUtils.bytes2Int(buffer, offset, u2);
+        offset += u2;
+        System.out.println("class_index: " + classIndex);
+
     }
 }
