@@ -88,7 +88,7 @@ public class ObjectUtil {
 
     public static void main(String[] args) {
         System.out.println("hello");
-        log.info("i am slf4j");
+//        log.info("i am slf4j");
 
 
         Map<String, Field> fieldList = getFieldList(String.class);
