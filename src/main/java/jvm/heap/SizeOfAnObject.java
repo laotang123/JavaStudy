@@ -1,6 +1,5 @@
 package jvm.heap;
 
-import com.sun.org.apache.bcel.internal.util.ClassLoader;
 import indi.ljf.jvm.agent.ObjectSizeAgent;
 
 /**
